@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Search, Phone, Star, Plus, Zap, Heart, X } from 'lucide-react';
 import axios from 'axios';
 import astrologerService from '../services/astrologerService';
@@ -16,7 +15,6 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export default function Dashboard() {
     const { user, setUser } = useAuth();
-    const navigate = useNavigate();
 
     // Data States
     const [astrologers, setAstrologers] = useState([]);
@@ -190,6 +188,7 @@ export default function Dashboard() {
                 setFilteredAstrologers(data);
             } catch (err) {
                 setAstrologers([]);
+                console.error(err)
             } finally {
                 setLoading(false);
             }

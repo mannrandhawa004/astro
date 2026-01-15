@@ -60,6 +60,7 @@ export default function Register() {
         navigate('/astrologers')
       } catch (error) {
         setApiError('Google Sign-in failed.')
+        console.error(error)
       } finally {
         setLoading(false)
       }

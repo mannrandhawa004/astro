@@ -1,4 +1,4 @@
-import { googleLoginService, loginUserService, registerUserServices} from "../services/auth.services.js"
+import { googleLoginService, loginUserService, registerUserServices } from "../services/auth.services.js"
 import { successResponse, errorResponse } from "../utils/response.js"
 import { cookieOptionsForAcessToken, cookieOptionsForRefreshToken } from "./cookie.config.js"
 import authModel from "../models/auth.model.js"
@@ -14,6 +14,7 @@ export const registerUserController = async (req, res, next) => {
 
         res.cookie("accessToken", accessToken, cookieOptionsForAcessToken)
         res.cookie("refreshToken", refreshToken, cookieOptionsForRefreshToken)
+        // console.log(user)
 
         return successResponse(res, "User registered successfully", user, 201)
     } catch (error) {
@@ -29,6 +30,7 @@ export const loginUserController = async (req, res, next) => {
 
         res.clearCookie("accessToken")
         res.clearCookie("refreshToken")
+        console.log(user)
 
         res.cookie("accessToken", accessToken, cookieOptionsForAcessToken)
         res.cookie("refreshToken", refreshToken, cookieOptionsForRefreshToken)
@@ -41,14 +43,23 @@ export const loginUserController = async (req, res, next) => {
 
 export const logoutUserController = async (req, res, next) => {
     try {
-        if (req.user?.id) {
-            await updateRefreshToken(req.user.id, null)
+
+        const userId = req.user?.id || req.user?._id;
+
+        if (userId) {
+            await authModel.findByIdAndUpdate(userId, {
+                refreshToken: null,
+                activeSessionId: null
+            });
         }
-        res.clearCookie("accessToken", cookieOptionsForAcessToken)
-        res.clearCookie("refreshToken", cookieOptionsForRefreshToken)
-        return successResponse(res, "Logout succesfull", 200)
+
+
+        res.clearCookie("accessToken", cookieOptionsForAcessToken);
+        res.clearCookie("refreshToken", cookieOptionsForRefreshToken);
+
+        return successResponse(res, "Logout successful", {}, 200);
     } catch (error) {
-        next(error)
+        next(error);
     }
 }
 
@@ -144,7 +155,7 @@ export const googleLoginController = async (req, res, next) => {
 
 export const updateProfileController = async (req, res, next) => {
     try {
-        const userId = req.user.id; 
+        const userId = req.user.id;
         const { fullName, email } = req.body;
 
         if (email) {
@@ -155,7 +166,7 @@ export const updateProfileController = async (req, res, next) => {
         }
 
         const updatedUser = await updateUserDetails(userId, { fullName, email });
-        
+
         return successResponse(res, "Profile updated successfully", updatedUser, 200);
     } catch (error) {
         next(error);

@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 
 export default function KundliPage() {
-    // --- State Management ---
     const [formData, setFormData] = useState({ 
         day: '', month: '', year: '', 
         hour: '', min: '', lat: '', 

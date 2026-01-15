@@ -32,6 +32,7 @@ const AstrologerList = () => {
       setAstrologers(data.data || data || []);
     } catch (err) {
       setError("Failed to load astrologers.");
+      console.error(err)
     } finally {
       setLoading(false);
     }
@@ -104,6 +105,7 @@ const AstrologerList = () => {
         setAstrologers(prev => prev.filter(astro => astro._id !== id));
       } catch (error) {
         toast.error('Failed to delete astrologer');
+        console.error(error)
       }
     }
   };

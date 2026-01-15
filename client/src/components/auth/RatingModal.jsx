@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Star, CheckCircle, Loader2, X, MessageSquare } from 'lucide-react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const RatingModal = ({ isOpen, onClose, astrologerId }) => {
     const [rating, setRating] = useState(0);
@@ -34,7 +35,8 @@ const RatingModal = ({ isOpen, onClose, astrologerId }) => {
                 resetState();
             }, 2000);
         } catch (error) {
-            alert("Failed to submit rating. Please try again.");
+            toast.error("Failed to submit rating. Please try again.");
+            console.error(error)
         } finally {
             setLoading(false);
         }

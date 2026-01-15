@@ -1,5 +1,3 @@
-import React from 'react'
-import Navbar from '../components/common/Navbar' // Check path
 import HeroSection from '../components/HeroSection' // Check path
 import FeaturesSection from '../components/FeaturesSection' // Check path
 import TestimonialSection from '../components/TestimonialSection' // Check path

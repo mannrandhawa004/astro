@@ -129,6 +129,63 @@ export const getDailyHoroscope = async (req, res) => {
     }
 };
 
+
+// export const getDailyHoroscope = async (req, res) => {
+//     try {
+//         const userId = req.user._id || req.user.id;
+//         const kundli = await KundliModel.findOne({ userId });
+
+//         if (!kundli) {
+//             return res.status(404).json({ success: false, message: "Please generate your Kundli first." });
+//         }
+
+//         const rasiMap = {
+//             "Aries": 1, "Taurus": 2, "Gemini": 3, "Cancer": 4,
+//             "Leo": 5, "Virgo": 6, "Libra": 7, "Scorpio": 8,
+//             "Sagittarius": 9, "Capricorn": 10, "Aquarius": 11, "Pisces": 12
+//         };
+
+//         const today = new Date();
+//         const tomorrow = new Date(today);
+//         tomorrow.setDate(tomorrow.getDate() + 1);
+
+//         const pad = (n) => n.toString().padStart(2, '0');
+//         const formattedDate = `${pad(tomorrow.getDate())}/${pad(tomorrow.getMonth() + 1)}/${tomorrow.getFullYear()}`;
+
+//         const response = await axios.get('https://api.vedicastroapi.com/v3-json/prediction/daily-sun', {
+//             params: {
+//                 zodiac: rasiMap[kundli.chartData.rasi],
+//                 date: formattedDate,
+//                 api_key: process.env.ASTRO_API_KEY,
+//                 lang: 'en',
+//                 split: true,
+//                 type: 'big'
+//             }
+//         });
+
+//         const apiResponse = response.data.response;
+
+//         // CHECK IF API IS OUT OF CALLS
+//         if (typeof apiResponse === 'string') {
+//             return res.status(429).json({ 
+//                 success: false, 
+//                 message: "Daily cosmic limit reached. Please try again tomorrow.",
+//                 raw_error: apiResponse 
+//             });
+//         }
+
+//         res.status(200).json({
+//             success: true,
+//             zodiac: kundli.chartData.rasi,
+//             date: formattedDate,
+//             prediction: apiResponse
+//         });
+
+//     } catch (error) {
+//         console.error("Horoscope Error:", error.message);
+//         res.status(500).json({ success: false, message: "Failed to fetch horoscope" });
+//     }
+// };
 export const getMatchingResult = async (req, res) => {
     try {
         const { p1, p2 } = req.body;

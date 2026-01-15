@@ -1,7 +1,8 @@
-import { createAstrologer, findAstrologerByEmail, findAllActiveAstrologers, updateAstrologerById,deleteAstrologerById} from "../dao/astrologer.dao.js";
+import { createAstrologer, findAstrologerByEmail, findAllActiveAstrologers, updateAstrologerById, deleteAstrologerById } from "../dao/astrologer.dao.js";
 import { ConflictError, NotFoundError } from "../utils/errorHanlder.js"; // Check spelling of errorHandler
 import AstrologerModel from '../models/astrologer.model.js';
-import { signToken } from "../utils/token.js";
+import { v4 as uuidv4 } from 'uuid';
+import { signToken, signRefreshToken } from "../utils/token.js";
 
 export const addAstrologerService = async (astroData) => {
     const existingAstrologer = await findAstrologerByEmail(astroData.email);
@@ -15,21 +16,31 @@ export const getAllAstrologersService = async (query) => {
     return await findAllActiveAstrologers();
 }
 
-export const loginAstrologerServices = async (email, password) => {
+
+
+export const loginAstrologerServices = async (email) => {
     const astrologer = await AstrologerModel.findOne({ email });
+    if (!astrologer) throw new NotFoundError("Astrologer not found");
 
-    if (!astrologer) throw new NotFoundError("User not found")
-    const tokenPayload = {
+    const sessionId = uuidv4();
+    const token = await signToken({
+        id: astrologer._id,
         email: astrologer.email,
-    };
+        role: "astrologer",
+        sessionId: sessionId
+    });
 
-    const token = signToken(tokenPayload);
+    const refreshToken = await signRefreshToken({
+        id: astrologer._id,
+        sessionId: sessionId
+    });
 
+    astrologer.activeSessionId = sessionId;
+    astrologer.refreshToken = refreshToken;
+    // astrologer.currentStatus = "online";
+    await astrologer.save();
 
-    const astrologerData = astrologer.toObject();
-    delete astrologerData.password;
-
-    return { astrologer: astrologerData, token };
+    return { astrologer, token, refreshToken };
 };
 
 export const updateAstrologerService = async (id, updateData) => {

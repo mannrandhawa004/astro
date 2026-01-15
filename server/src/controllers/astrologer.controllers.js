@@ -1,7 +1,7 @@
 import { addAstrologerService, getAllAstrologersService, loginAstrologerServices, updateAstrologerService, deleteAstrologerService } from "../services/astrologer.services.js";
 import { BadRequestError } from "../utils/errorHanlder.js";
 import { successResponse } from "../utils/response.js";
-import { cookieOptionsForAcessToken } from "./cookie.config.js";
+import { cookieOptionsForAcessToken ,cookieOptionsForRefreshToken} from "./cookie.config.js";
 import { uploadFromBuffer } from "../utils/cloudinary.js";
 import CallTransaction from "../models/callTransaction.model.js";
 import Review from "../models/review.model.js";
@@ -67,16 +67,25 @@ export const loginAstrologerController = async (req, res, next) => {
     }
 };
 
+
 export const logoutAstrolgerController = async (req, res, next) => {
     try {
-        res.clearCookie("accessToken", cookieOptionsForAcessToken)
-        return successResponse(res, "Astrologer logout successfully", 200)
+        if (req.astrologer?._id) {
+            await Astrologer.findByIdAndUpdate(req.astrologer._id, {
+                activeSessionId: null,
+                refreshToken: null,
+                currentStatus: "offline"
+            });
+        }
+
+        res.clearCookie("accessToken", cookieOptionsForAcessToken);
+        res.clearCookie("refreshToken", cookieOptionsForRefreshToken); // Clear refresh too
+
+        return successResponse(res, "Astrologer logout successfully", 200);
     } catch (error) {
-        next(error)
+        next(error);
     }
-
-}
-
+};
 export const getCurrentAstrologer = async (req, res, next) => {
     try {
         if (req.astrologer) {
@@ -120,7 +129,7 @@ export const getAstrologerStats = async (req, res) => {
             totalCalls: transactions.length
         });
     } catch (err) {
-        console.error("Stats Error:", err); 
+        console.error("Stats Error:", err);
         res.status(500).json({ message: "Internal Server Error in Stats" });
     }
 };

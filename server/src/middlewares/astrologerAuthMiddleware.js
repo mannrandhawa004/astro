@@ -1,23 +1,27 @@
 import jwt from "jsonwebtoken";
-import AstrologerModel from "../models/astrologer.model.js";
-import { NotFoundError, UnauthorizedError } from "../utils/errorHanlder.js";
+import Astrologer from "../models/astrologer.model.js";
+import { errorResponse } from "../utils/response.js";
 
 export const astrologerMiddleware = async (req, res, next) => {
   try {
-    const token = req.cookies.accessToken
+    const token = req.cookies?.accessToken;
+    if (!token) return errorResponse(res, "Unauthorized - No token provided", 401);
 
-    if (!token) throw new NotFoundError("Token not founded")
-    const secret = process.env.JWT_SECERET_KEY || process.env.JWT_SECRET;
-    const decoded = jwt.verify(token, secret);
+    const decoded = jwt.verify(token, process.env.JWT_SECERET_KEY);
+    const astrologer = await Astrologer.findById(decoded.id);
 
-    const astrologer = await AstrologerModel.findOne({ email: decoded.email });
+    if (!astrologer) {
+      return errorResponse(res, "Astrologer not found", 401);
+    }
 
-    if (!astrologer) throw new UnauthorizedError("Unauthorized: Astrologer account not found")
+ 
+    if (astrologer.activeSessionId !== decoded.sessionId) {
+      return errorResponse(res, "Session expired - Logged in from another device", 401);
+    }
+
     req.astrologer = astrologer;
-    req.astrologerId = astrologer._id;
-
     next();
   } catch (error) {
-    next(error)
+    return errorResponse(res, "Invalid session", 401);
   }
 };

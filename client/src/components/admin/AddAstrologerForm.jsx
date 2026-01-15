@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import astrologerService from "../../services/astrologerService";
 import { User, Mail, Phone, Star, Award, DollarSign, Upload, Image as ImageIcon, AlertCircle } from "lucide-react";
+import toast from "react-hot-toast";
 
 const AddAstrologerForm = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
